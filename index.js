@@ -32,7 +32,7 @@ app.route("/api/users").post((req,res) => {
 
 // Post exercises
 app.post("/api/users/:_id/exercises", (req,res) => {
-  const userId = req.params._id;
+  const userId = Number(req.params._id);
   const description = req.body.description;
   const duration = Number(req.body.duration);
   const date = req.body.date ? new Date(req.body.date).toDateString() : new Date().toDateString();
@@ -40,10 +40,18 @@ app.post("/api/users/:_id/exercises", (req,res) => {
     const user = users[userId];
     res.json({username: user.username, description: description, duration: duration, date: date, _id: userId});
     const exercise = {description: description, duration: duration, date: date};
-    logs.push(exercise);
+    logs[userId].push(exercise);
   } else {
     res.json({error: "invalid user"});
   }
+});
+
+// Get exercise logs
+app.get("/api/users/:_id/logs", (req,res) => {
+  const userId = req.params._id;
+  const log = logs[userId];
+  const user = users[userId];
+  res.json({username: user.username, count: log.length, _id: userId, log: log});
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
