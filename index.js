@@ -49,9 +49,20 @@ app.post("/api/users/:_id/exercises", (req,res) => {
 // Get exercise logs
 app.get("/api/users/:_id/logs", (req,res) => {
   const userId = req.params._id;
-  const log = logs[userId];
+  let userLogs = logs[userId];
+  const count = userLogs.length;
   const user = users[userId];
-  res.json({username: user.username, count: log.length, _id: userId, log: log});
+  const from = req.query.from;
+  const to = req.query.to;
+  const limit = Number(req.query.limit);
+  userLogs = userLogs.filter(({date}) => {
+    return (
+      (from ? new Date(date) >= new Date(from) : true)
+      && (to ? new Date(date) <= new Date(to) : true)
+    )
+  });
+  if (limit) userLogs = userLogs.slice(0,limit);
+  res.json({username: user.username, count: count, _id: userId, log: userLogs});
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
